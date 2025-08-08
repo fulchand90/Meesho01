@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const productList = [
   {
@@ -144,19 +145,26 @@ const productList = [
 ];
 
 function Products() {
-  // Split the productList into chunks of 5 items per row
-  const chunked = [];
-  for (let i = 0; i < productList.length; i += 5) {
-    chunked.push(productList.slice(i, i + 5));
-  }
+  const navigate = useNavigate();
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+
+  const handleBuyClick = (product, productId) => {
+    // Navigate to product page instead of showing modal directly
+    navigate(`/product/${productId + 1}`);
+  };
+
+  const handleProductClick = (productId) => {
+    navigate(`/product/${productId + 1}`);
+  };
 
   return (
     <div className="products">
       <h4>Products For You</h4>
-      {chunked.map((row, rowIndex) => (
-        <div className="product-box" key={rowIndex}>
-          {row.map((product, index) => (
-            <div className="pro-box" key={index}>
+      <div className="product-grid">
+        {productList.map((product, index) => (
+          <div className="pro-box" key={index}>
+            <div onClick={() => handleProductClick(index)} style={{cursor: 'pointer'}}>
               <img src={product.img} alt={product.name} />
               <div className="pro-data">
                 <p>{product.name}</p>
@@ -173,9 +181,84 @@ function Products() {
                 </div>
               </div>
             </div>
+            <button 
+              className="buy-btn"
+              onClick={() => handleBuyClick(product, index)}
+            >
+              Buy Now
+            </button>
+          </div>
+        ))}
+      </div>
+      
+      {/* Payment Modal */}
+      {showPaymentModal && (
+        <PaymentModal 
+          product={selectedProduct}
+          onClose={() => setShowPaymentModal(false)}
+        />
+      )}
+    </div>
+  );
+}
+
+// Payment Modal Component
+function PaymentModal({ product, onClose }) {
+  const [selectedPayment, setSelectedPayment] = useState('');
+  
+  const paymentOptions = [
+    { id: 'phonepe', name: 'PhonePe', logo: '/assets/phonepe.svg' },
+    { id: 'paytm', name: 'Paytm', logo: '/assets/paytm.svg' },
+    { id: 'googlepay', name: 'Google Pay', logo: '/assets/googlepay.svg' },
+  ];
+
+  const handlePayment = () => {
+    if (!selectedPayment) {
+      alert('Please select a payment method');
+      return;
+    }
+
+    // Simulate payment process
+    alert(`Payment initiated via ${selectedPayment}. This is a demo - no actual payment will be processed.`);
+    onClose();
+  };
+
+  return (
+    <div className="payment-modal-overlay" onClick={onClose}>
+      <div className="payment-modal" onClick={(e) => e.stopPropagation()}>
+        <button className="close-btn" onClick={onClose}>×</button>
+        <h3>Complete Your Purchase</h3>
+        
+        <div className="payment-details">
+          <h4>{product.name}</h4>
+          <p>Price: {product.price}</p>
+          <p>Rating: {product.rating} ⭐ ({product.reviews} reviews)</p>
+          <p>Free Delivery Available</p>
+        </div>
+
+        <div className="payment-options">
+          <h4>Select Payment Method</h4>
+          {paymentOptions.map((option) => (
+            <div
+              key={option.id}
+              className={`payment-option ${selectedPayment === option.name ? 'selected' : ''}`}
+              onClick={() => setSelectedPayment(option.name)}
+            >
+              <img src={option.logo} alt={option.name} style={{width: '40px', height: '40px', marginRight: '12px'}} />
+              <span>{option.name}</span>
+            </div>
           ))}
         </div>
-      ))}
+
+        <div className="payment-buttons">
+          <button className="payment-btn secondary" onClick={onClose}>
+            Cancel
+          </button>
+          <button className="payment-btn primary" onClick={handlePayment}>
+            Pay {product.price}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

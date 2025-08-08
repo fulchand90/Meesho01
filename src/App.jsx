@@ -1,4 +1,5 @@
 import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Banner from "./components/Banner";
 import Policy from "./components/Policy";
@@ -8,9 +9,11 @@ import BrandSection from "./components/BrandSection";
 import Trendz from "./components/Trendz";
 import Products from "./components/Products";
 import Footer from "./components/Footer";
-import "./index.css"; // Include your current style.css here
+import ProductPage from "./components/ProductPage";
+import "./index.css";
 
-function App() {
+// Home Page Component
+function HomePage() {
   return (
     <>
       <Navbar />
@@ -23,6 +26,17 @@ function App() {
       <Products />
       <Footer />
     </>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/product/:id" element={<ProductPage />} />
+      </Routes>
+    </Router>
   );
 }
 
